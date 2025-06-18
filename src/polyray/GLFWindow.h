@@ -2,7 +2,7 @@
 #define GLFWINDOW_H_INCLUDED
 
 #pragma once
-#include "base/fuck_opengl/glad.h"
+#include "base/glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <string>
 #include <stdexcept>
