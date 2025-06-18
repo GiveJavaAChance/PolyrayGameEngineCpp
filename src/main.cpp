@@ -124,27 +124,11 @@ int main() {
 #include "polyray/Vector2f.h"
 #include "polyray/Vector3f.h"
 #include "polyray/VertexBufferTemplate.h"
+#include "polyray/ResourceLoader.h"
 
 int main() {
-    GLFWindow w = GLFWindow("title");
-    w.createFrame(500, 500, false, false, false);
-
-    w.hideCursor(true);
-
-    while(w.isWindowOpen()) {
-        if(Input::getKey(GLFW_KEY_W)) {
-            std::cout << "Forward!" << std::endl;
-        }
-        if(Input::getKey(GLFW_KEY_A)) {
-            std::cout << "Left!" << std::endl;
-        }
-        if(Input::getKey(GLFW_KEY_S)) {
-            std::cout << "Back!" << std::endl;
-        }
-        if(Input::getKey(GLFW_KEY_D)) {
-            std::cout << "Right!" << std::endl;
-        }
-        w.update();
-    }
+    FileInputStream in = ResourceLoader::getResource("shaders\\Texture3D.frag");
+    BufferedReader reader(in);
+    std::cout << reader.readAll();
 }
 
