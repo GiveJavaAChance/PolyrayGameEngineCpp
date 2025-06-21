@@ -2,16 +2,16 @@
 #define SHADERBUFFER_H_INCLUDED
 
 #pragma once
-#include <GL/gl.h>
 #include <cstdint>
+#include "base/glad/glad.h"
 
 struct ShaderBuffer {
 private:
-    GLenum target;
     GLenum usage;
 
 public:
     GLuint ID;
+    GLenum target;
 
 
     ShaderBuffer(GLenum target, GLenum usage) : target(target), usage(usage) {

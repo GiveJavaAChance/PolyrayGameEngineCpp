@@ -2,10 +2,10 @@
 #define GLTEXTUREARRAY_H_INCLUDED
 
 #pragma once
-#include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <algorithm>
 #include <cstdint>
+#include "base/glad/glad.h"
 #include "polyray/Texture.h"
 #include "polyray/GLTexture.h"
 
@@ -13,11 +13,7 @@ class GLTextureArray : public GLTexture {
     int layers = 0;
 
 public:
-    GLTextureArray(uint32_t width, uint32_t height, uint32_t layers, int interFormat, bool interpolate, bool wrap)
-        : layers(layers) {
-        this->width = width;
-        this->height = height;
-        this->interFormat = interFormat;
+    GLTextureArray(uint32_t width, uint32_t height, uint32_t layers, GLenum interFormat, bool interpolate, bool wrap) : GLTexture(width, height, interFormat), layers(layers) {
         this->interpolationMode = interpolate ? GL_LINEAR : GL_NEAREST;
         this->wrapMode = wrap ? GL_REPEAT : GL_CLAMP_TO_EDGE;
 

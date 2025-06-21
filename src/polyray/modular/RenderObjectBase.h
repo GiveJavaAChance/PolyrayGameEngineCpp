@@ -5,6 +5,8 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <algorithm>
+#include "base/glad/glad.h"
 #include "polyray/modular/Renderable.h"
 #include "polyray/VertexBufferTemplate.h"
 #include "polyray/ShaderProgram.h"

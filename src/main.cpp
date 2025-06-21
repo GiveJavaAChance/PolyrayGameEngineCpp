@@ -90,8 +90,7 @@ int main() {
 
 #include <iostream>
 #include <chrono>
-
-#include "polyray/GLFWindow.h"
+#include "base/glad/glad.h"
 
 #include "base/AudioFormat.h"
 #include "base/AudioInputStream.h"
@@ -113,7 +112,7 @@ int main() {
 #include "polyray/modular/Vertex.h"
 
 #include "polyray/GLFramebuffer.h"
-//#include "polyray/GLFWindow.h"
+#include "polyray/GLFWindow.h"
 #include "polyray/GLTexture.h"
 #include "polyray/GLTextureArray.h"
 #include "polyray/Input.h"
@@ -125,10 +124,23 @@ int main() {
 #include "polyray/Vector3f.h"
 #include "polyray/VertexBufferTemplate.h"
 #include "polyray/ResourceLoader.h"
+#include "polyray/Transform3D.h"
+#include "polyray/BindingRegistry.h"
 
 int main() {
-    FileInputStream in = ResourceLoader::getResource("shaders\\Texture3D.frag");
-    BufferedReader reader(in);
-    std::cout << reader.readAll();
+    GLFWindow w = GLFWindow("Title");
+    w.createFrame(500, 500, false, true, false);
+
+    w.keyPress = [](int key) {
+        std::cout << "Key pressed: " << key << std::endl;e
+    };
+
+    GLTexture tex = GLTexture(512, 512, GL_RGBA8, GL_RGBA, false, false);
+
+    uint32_t binding = BindingRegistry::bindImageTexture(tex, 0, false, 0, GL_READ_WRITE);
+
+    while(w.isWindowOpen()) {
+        w.update();
+    }
 }
 

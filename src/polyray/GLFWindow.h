@@ -10,28 +10,27 @@
 #include <iostream>
 #include "polyray/Input.h"
 
-class GLFWindow {
-protected:
+struct GLFWindow {
+private:
     uint32_t width = 0, height = 0;
     std::string name;
     GLFWwindow* window = nullptr;
     int32_t exitKey = GLFW_KEY_Q;
 
-    const uint32_t numEffects = 20;
-    uint32_t effect = numEffects - 1;
-    int32_t effectKey = GLFW_KEY_G;
-
     int32_t button = -1;
-    float mx = 0.f, my = 0.f;
+    float mx = 0.0f, my = 0.0f;
 
 public:
     explicit GLFWindow(const std::string& title) : name(title) {}
 
-    virtual ~GLFWindow() {
+    ~GLFWindow() {
         exit();
     }
 
     void createFrame(uint32_t w, uint32_t h, bool titleBar, bool fullscreen, bool exclusive) {
+        if (!glfwInit()) {
+            throw std::runtime_error("Unable to initialize GLFW");
+        }
         if (fullscreen) {
             const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             if (!mode) throw std::runtime_error("Failed to get primary monitor video mode");
@@ -40,10 +39,6 @@ public:
         } else {
             width = w;
             height = h;
-        }
-
-        if (!glfwInit()) {
-            throw std::runtime_error("Unable to initialize GLFW");
         }
 
         glfwDefaultWindowHints();
@@ -103,25 +98,8 @@ public:
         glfwGetCursorPos(window, &x, &y);
     }
 
-    virtual void keyPress(int key) {}
-    virtual void keyRelease(int key) {}
-
-    virtual void mousePress(float x, float y, int button) {}
-    virtual void mouseRelease(float x, float y, int button) {}
-
-    virtual void mouseMove(float x, float y) {}
-    virtual void mouseDrag(float x0, float y0, float x1, float y1, int button) {}
-
-    virtual void scroll(float x, float y, float amt) {}
-    virtual void effectChanged(uint32_t effect) {}
-    virtual void windowResized(uint32_t width, uint32_t height) {}
-
     void setExitShortcut(int32_t key) {
         exitKey = key;
-    }
-
-    void setEffectKey(int32_t key) {
-        effectKey = key;
     }
 
     bool isWindowOpen() const {
@@ -150,9 +128,23 @@ public:
     uint32_t getWidth() const {
         return width;
     }
+
     uint32_t getHeight() const {
         return height;
     }
+
+    void (*keyPress)(int) = nullptr;
+    void (*keyRelease)(int) = nullptr;
+
+    void (*mousePress)(float, float, int) = nullptr;
+    void (*mouseRelease)(float, float, int) = nullptr;
+
+    void (*mouseMove)(float, float) = nullptr;
+    void (*mouseDrag)(float, float, float, float, int) = nullptr;
+
+    void (*scroll)(float, float, float) = nullptr;
+    void (*effectChanged)(uint32_t) = nullptr;
+    void (*windowResized)(uint32_t, uint32_t) = nullptr;
 
 private:
     void setupCallbacks() {
@@ -163,15 +155,16 @@ private:
             if (action == GLFW_PRESS) {
                 if (key == self->exitKey) {
                     glfwSetWindowShouldClose(win, GLFW_TRUE);
-                } else if (key == self->effectKey) {
-                    self->effect = (self->effect + 1) % self->numEffects;
-                    self->effectChanged(self->effect);
                 }
                 Input::setKey(key, true);
-                self->keyPress(key);
+                if (self->keyPress) {
+                    self->keyPress(key);
+                }
             } else if (action == GLFW_RELEASE) {
                 Input::setKey(key, false);
-                self->keyRelease(key);
+                if (self->keyRelease) {
+                    self->keyRelease(key);
+                }
             }
         });
 
@@ -185,10 +178,10 @@ private:
             float y = static_cast<float>(self->height) - static_cast<float>(ypos);
 
             if (action == GLFW_PRESS) {
-                self->mousePress(x, y, button);
+                if (self->mousePress) self->mousePress(x, y, button);
                 self->button = button;
             } else if (action == GLFW_RELEASE) {
-                self->mouseRelease(x, y, button);
+                if (self->mouseRelease) self->mouseRelease(x, y, button);
                 self->button = -1;
             }
         });
@@ -201,9 +194,9 @@ private:
             float y = static_cast<float>(self->height) - static_cast<float>(ypos);
 
             if (self->button != -1) {
-                self->mouseDrag(self->mx, self->my, x, y, self->button);
+                if (self->mouseDrag) self->mouseDrag(self->mx, self->my, x, y, self->button);
             } else {
-                self->mouseMove(x, y);
+                if (self->mouseMove) self->mouseMove(x, y);
             }
             self->mx = x;
             self->my = y;
@@ -218,7 +211,7 @@ private:
             float x = static_cast<float>(xpos);
             float y = static_cast<float>(self->height) - static_cast<float>(ypos);
 
-            self->scroll(x, y, static_cast<float>(yOffset));
+            if (self->scroll) self->scroll(x, y, static_cast<float>(yOffset));
         });
 
         glfwSetWindowSizeCallback(window, [](GLFWwindow* win, int newWidth, int newHeight) {
@@ -228,7 +221,7 @@ private:
             self->width = static_cast<uint32_t>(newWidth);
             self->height = static_cast<uint32_t>(newHeight);
             glViewport(0, 0, newWidth, newHeight);
-            self->windowResized(newWidth, newHeight);
+            if (self->windowResized) self->windowResized(newWidth, newHeight);
         });
 
         glfwSetFramebufferSizeCallback(window, [](GLFWwindow* win, int fbWidth, int fbHeight) {
@@ -238,7 +231,7 @@ private:
             self->width = static_cast<uint32_t>(fbWidth);
             self->height = static_cast<uint32_t>(fbHeight);
             glViewport(0, 0, fbWidth, fbHeight);
-            self->windowResized(fbWidth, fbHeight);
+            if (self->windowResized) self->windowResized(fbWidth, fbHeight);
         });
     }
 };

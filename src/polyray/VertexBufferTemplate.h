@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <cstdint>
-#include "GL/gl.h"
+#include "base/glad/glad.h"
 
 struct VertexAttribute {
 

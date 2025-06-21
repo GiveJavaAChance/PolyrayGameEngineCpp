@@ -3,7 +3,7 @@
 
 #pragma once
 #include <stdexcept>
-#include <GL/gl.h>
+#include "base/glad/glad.h"
 #include "polyray/GLTexture.h"
 
 struct GLFramebuffer {

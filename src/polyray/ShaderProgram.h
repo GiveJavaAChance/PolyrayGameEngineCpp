@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <GL/gl.h>
+#include "base/glad/glad.h"
 
 struct ShaderProgram {
 
